@@ -9,85 +9,93 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var youTubeTableVIew: UITableView!
     
-        
-    @IBOutlet weak var collection: UICollectionView!
+    @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var cost: UILabel!
     
+    @IBOutlet weak var search: UISearchBar!
     
-    
-    var videos:[Youtube] = [Youtube(image1: "1", title: "_sydykov_ - новая Песня", icon: "4", viewsCount: 12339433),Youtube(image1: "2", title: "как пользоватся GarageBand", icon: "2", viewsCount: 123434323),Youtube(image1: "3", title: "Apple Music стал бесплатным!", icon: "3", viewsCount: 12334455)]
-    var shortVideo:[Shorts] = [Shorts(title: "Clarence", views: 1232434, image: "6"), Shorts(title: "Rick and Morty", views: 1343234, image: "5"), Shorts(title: "Нечто прекрасное", views: 1232343, image: "7"), Shorts(title: "что будет если не есть неделю ", views: 134324234, image: "9"), Shorts(title: "космические часики", views: 234324234324, image: "10")]
-    
-
+//        var names:[Ip] = [Ip(name: "Имбраимова", cost: 400), Ip(name: "Донецкая", cost: 500), Ip(name: "Магистраль", cost: 500), Ip(name: "Советская", cost: 400)]
+    var names:[String] = ["Ибраимова - 500 ", "Донецкая - 400", "Советская - 500", "Советская - 1000", "Магистраль - 600"]
+    var cost1:[Int] = [500, 400, 500, 1000, 600]
+    var cosr = ""
+    var array:[String] = []
+  
+    var filteredNames:[String] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-//        let shortslayout = UICollectionViewFlowLayout()
-//        shortslayout.scrollDirection = .horizontal
-        let layout = UICollectionViewFlowLayout()
-        collection.collectionViewLayout = layout
-        layout.scrollDirection = .horizontal
-        layout.minimumLineSpacing = 15
-        layout.minimumInteritemSpacing = 15
-        youTubeTableVIew.showsVerticalScrollIndicator = false
-        collection.showsVerticalScrollIndicator = false
-        collection.showsHorizontalScrollIndicator = false
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "name_cell")
+        tableView.dataSource = self
+        tableView.delegate = self
+//                filteredNames = names
+        cost.text = cosr
         
         
     }
-
-
 }
-
 extension ViewController:UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return videos.count
+        return filteredNames.count
+      
     }
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "youtube_cell", for: indexPath) as! YouTubeCell
-        cell.imageVIew.image = UIImage(named:videos[indexPath.row].image1)
-        cell.channelYoutube.image = UIImage(named: videos[indexPath.row].image1)
-        cell.titleYoutube.text = "\(videos[indexPath.row].title)"
-        cell.channelYoutube.image = UIImage(named: videos[indexPath.row].icon)
-        cell.viewsYoutube.text = "\(videos[indexPath.row].viewsCount) просмотров"
+        let cell = tableView.dequeueReusableCell(withIdentifier: "name_cell", for: indexPath)
+        cell.textLabel?.text = filteredNames[indexPath.row]
         return cell
     }
-    
-    
 }
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 400
+        return 100
+    }
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       //        print(names[indexPath.row])
+           
+            let alert = UIAlertController(title: "Адрес", message: "Улица адреса", preferredStyle: .alert)
+//                  var alertTextField = UITextField ()
+//                  alert.addTextField() { TextField in
+//                      alertTextField = TextField
+//
+//                  }
+                  let acceptActio = UIAlertAction(title: "заказать ", style: .destructive) {
+                      action in
+                      self.cost.text! = "цена за улицу - \(self.cost1[indexPath.row])"
+                      print("ds")
+//                      self.filteredNames.insert("\(self.names[indexPath.row])", at: 0)
+//                      self.tableView.reloadData()
+                      self.filteredNames.append(contentsOf: self.names)
+                  }
+                  let cancelAction = UIAlertAction(title: "Отмена", style: .cancel) {
+                      action in
+                      self.names.append(self.cost.text!)
+                      self.names.append(contentsOf: self.names)
+                      self.filteredNames = self.names
+                      self.tableView.reloadData()
+                  }
+                  alert.addAction(acceptActio)
+                  alert.addAction(cancelAction)
+                  present(alert,animated: true)
+     
+           }
+       }
+
+extension ViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+
+        var names:[String] = ["Ибраимова - 500", "Донецкая - 400", "Советская - 500", "Советская - 1000", "Магистраль - 600"]
+        filteredNames = []
+        if searchText == "\(names)" {
+           filteredNames = names
+//
+        } else {
+            for names in names {
+                if names.uppercased().contains((searchText.uppercased())) {
+                    filteredNames.append(names)
+                }
+            }
+        }
+        tableView.reloadData()
     }
 }
-extension ViewController:UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return shortVideo.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "short_cell", for: indexPath) as! ShortsCollectionViewCell
-        cell.titleshort.text = shortVideo[indexPath.row].title
-        cell.viewsShort.text = "\(shortVideo[indexPath.row].views) просмотров "
-        cell.shortsVideo.image = UIImage(named: shortVideo[indexPath.row].image)
-        cell.shortsVideo.backgroundColor = .black
-//        if indexPath.row % 2 == 0 {
-//            cell.shortsVideo.image = UIImage(named: "5")
-//        } else {
-//            cell.shortsVideo.image = UIImage(named: "6")
-//        }
-        return cell
-    }
-    
-}
-extension ViewController:UICollectionViewDelegateFlowLayout{
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: view.frame.width / 2, height: view.frame.width / 2)
-    }
-}
-
-
-
